@@ -10,6 +10,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <div className={GeistSans.className}>
       <Component {...pageProps} />
+      <Analytics />
     </div>
   );
 };

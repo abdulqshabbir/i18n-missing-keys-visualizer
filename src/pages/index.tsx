@@ -2,7 +2,9 @@ import { Check, Drum, FolderUp, X } from "lucide-react";
 import Head from "next/head";
 import Image from "next/image";
 import { useCallback, useState } from "react";
+import ReactConfetti from "react-confetti";
 import { useDropzone } from "react-dropzone";
+import { useWindowSize } from "react-use";
 
 type MissingKey = {
   file: string;
@@ -17,6 +19,7 @@ export default function Home() {
   const [numberOfFilledKeys, setNumberOfFilledKeys] = useState(0);
   const [numberOfMissingKeys, setNumberOfMissingKeys] = useState(0);
   const [filesParsed, setFilesParsed] = useState<string[]>([])
+  const { width, height } = useWindowSize(1000, 1000)
 
   const groupedKeys = missingKeys.reduce(
     (groupedKeys: GroupedKeys, key: MissingKey) => {
@@ -135,6 +138,12 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {isDoneParsing && numberOfMissingKeys === 0 && (
+          <ReactConfetti
+            width={width}
+            height={height}
+          />
+        )}
         {isDoneParsing && (
           <div className="flex flex-col gap-8 p-12 text-secondary">
             <div className="text-md text-secondary font-bold">Summary:</div>

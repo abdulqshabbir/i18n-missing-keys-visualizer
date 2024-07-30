@@ -12,10 +12,11 @@ type MissingKey = {
 type GroupedKeys = Record<string, string[]>;
 
 export default function Home() {
-  const [filesParsed, setFilesParsed] = useState(false);
+  const [isDoneParsing, setIsDoneParsing] = useState(false);
   const [missingKeys, setMissingKeys] = useState<MissingKey[]>([]);
   const [numberOfFilledKeys, setNumberOfFilledKeys] = useState(0);
   const [numberOfMissingKeys, setNumberOfMissingKeys] = useState(0);
+  const [filesParsed, setFilesParsed] = useState<string[]>([])
 
   const groupedKeys = missingKeys.reduce(
     (groupedKeys: GroupedKeys, key: MissingKey) => {
@@ -29,16 +30,16 @@ export default function Home() {
     {},
   );
 
-  console.log({
-    groupedKeys,
-  });
-
   const onDrop = useCallback((acceptedFiles: File[]) => {
+    setNumberOfFilledKeys(() => 0)
+    setNumberOfMissingKeys(() => 0);
+    setMissingKeys(() => [])
+    setIsDoneParsing(false)
+    setFilesParsed(() => [])
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.readAsText(file);
       reader.onloadend = () => {
-        console.log("______ FILE READ _______ ", reader.result);
 
         const jsonFile = reader.result;
         if (typeof jsonFile !== "string") {
@@ -53,25 +54,18 @@ export default function Home() {
 
         const keys = findMissingKeysRecurse(translationFileAsObject);
 
-        const { filledKeys, missingKeys } = findFilledKeysRecurse(
+        const { filledKeys, missingKeys } = findNumberOfFilledOrMissingKeysRecurse(
           translationFileAsObject,
         );
 
-        setMissingKeys((prev) => [
-          ...prev,
+        setFilesParsed(prev => ([...prev, file.name]))
+        setMissingKeys((prevMissingKeys) => [
+          ...prevMissingKeys,
           ...keys.map((key) => ({ file: file.name, missingKey: key })),
         ]);
-        setNumberOfFilledKeys(filledKeys);
-        setNumberOfMissingKeys(missingKeys);
-
-        console.log(
-          "______ FILE NAME _______ ",
-          file.name,
-          file.webkitRelativePath,
-        );
-        console.log("______ MISSING KEYS _______ ", keys);
-
-        setFilesParsed(true);
+        setNumberOfFilledKeys(prev => prev + filledKeys);
+        setNumberOfMissingKeys(prev => prev + missingKeys);
+        setIsDoneParsing(true);
       };
     });
   }, []);
@@ -103,7 +97,7 @@ export default function Home() {
               Find React i18n Keys easily
             </h1>
             <h3 className="text-md">
-              React i18n Missing Keys Visualizer is a tool for developers and
+              React i18n missing keys visualizer is a tool for developers and
               non-developers to quickly identify missing keys in their i18n JSON
               files.
             </h3>
@@ -114,7 +108,7 @@ export default function Home() {
               className={`border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} flex h-64 w-64 items-center justify-center p-12 ${isDragActive ? "bg-purple-200" : "bg-primary"} rounded-lg text-md text-secondary`}
             >
               <input {...getInputProps()} />
-              {!filesParsed && (
+              {!isDoneParsing && (
                 <>
                   {isDragActive ? (
                     <div className="flex flex-col items-center justify-center gap-4 text-sm text-gray-400">
@@ -132,18 +126,22 @@ export default function Home() {
                   )}
                 </>
               )}
-              {filesParsed && (
+              {isDoneParsing && (
                 <div className="flex flex-col items-center justify-center gap-4 text-sm text-gray-400">
                   <Check size={60} className="text-green-500" />
-                  <p>Files accepted!</p>
+                  <p className="text-center">{filesParsed.length} JSON Files accepted!</p>
                 </div>
               )}
             </div>
           </div>
         </div>
-        {filesParsed && (
+        {isDoneParsing && (
           <div className="flex flex-col gap-8 p-12 text-secondary">
-            <div className="text-md font-bold">Summary of files:</div>
+            <div className="text-md text-secondary font-bold">Summary:</div>
+            <div className="text-sm text-secondary">{filesParsed.length} file{filesParsed.length !== 1 ? "s" : ""} parsed</div>
+            <div className="flex gap-4 flex-wrap">
+              {filesParsed.map((file) => <div className="text-sm text-secondary px-2 py-1 bg-gray-100 rounded-sm" key={file}>{file}</div>)}
+            </div>
             <div className="flex flex-col gap-4 rounded-lg bg-gray-100 p-4">
               <div className="flex gap-4">
                 <Check className="text-green-500" />
@@ -154,7 +152,6 @@ export default function Home() {
                 <p>{numberOfMissingKeys} keys missing</p>
               </div>
             </div>
-            <div className="text-md font-bold">Keys to fill:</div>
             <div className="flex flex-col gap-8">
               {Object.keys(groupedKeys).map((fileName) => (
                 <div key={fileName} className="flex flex-col gap-4">
@@ -178,16 +175,15 @@ export default function Home() {
             </div>
           </div>
         )}
-        {!filesParsed && (
+        {!isDoneParsing && (
           <div className="flex flex-col gap-8 p-12 text-secondary">
-            <h3 className="text-lg font-bold">Feature-packed</h3>
+            <h3 className="text-lg font-bold">Built to Simplify Workflows</h3>
             <div className="flex flex-col gap-12 lg:flex-row">
               <div className="flex flex-col lg:w-1/2">
-                <h4 className="text-md">Built to Simplify Workflows</h4>
                 <p>
                   React i18n missing keys visualizer is a tool to help your
-                  organization similfify workflows when you have dedicated
-                  translators who need to quickly locate missing keys
+                  organization simplify workflows when you have dedicated
+                  translators who need to quickly locate missing keys.
                 </p>
               </div>
               <div className="flex flex-col lg:flex-row">
@@ -205,10 +201,6 @@ export default function Home() {
                   <div className="flex gap-4">
                     <Check />
                     <p>Quickly locate missing keys</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <Check />
-                    <p>No cost to build a custom dashboard</p>
                   </div>
                 </div>
               </div>
@@ -265,26 +257,21 @@ function findMissingKeysRecurse(
   return missingKeys;
 }
 
-let filledKeys = 0;
-let missingKeys = 0;
 
-function findFilledKeysRecurse(obj: Record<string, unknown>) {
+function findNumberOfFilledOrMissingKeysRecurse(obj: Record<string, unknown>, count = { filledKeys: 0, missingKeys: 0 }) {
   const keys = Object.keys(obj);
   for (const key of keys) {
     // This is a leaf nod
     if (typeof obj[key] === "string") {
       if (obj[key] !== "") {
-        filledKeys++;
+        count.filledKeys = count.filledKeys + 1;
       } else {
-        missingKeys++;
+        count.missingKeys = count.missingKeys + 1;
       }
     } else {
       // This is a nested object
-      findFilledKeysRecurse(obj[key] as Record<string, unknown>);
+      findNumberOfFilledOrMissingKeysRecurse(obj[key] as Record<string, unknown>, count);
     }
   }
-  return {
-    filledKeys,
-    missingKeys,
-  };
+  return count;
 }

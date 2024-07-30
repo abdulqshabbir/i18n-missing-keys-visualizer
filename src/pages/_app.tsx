@@ -1,5 +1,6 @@
 import { GeistSans } from "geist/font/sans";
 import { type AppType } from "next/app";
+import { Analytics } from "@vercel/analytics/react"
 
 import { api } from "@/utils/api";
 

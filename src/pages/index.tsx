@@ -110,7 +110,7 @@ export default function Home() {
               {...getRootProps()}
               className={`border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} flex h-64 w-64 items-center justify-center p-12 ${isDragActive ? "bg-purple-200" : "bg-primary"} rounded-lg text-md text-secondary`}
             >
-              <input {...getInputProps()} />
+              <input {...getInputProps()} data-testid="dropzone" />
               {!isDoneParsing && (
                 <>
                   {isDragActive ? (
@@ -171,6 +171,7 @@ export default function Home() {
                       <div
                         key={`${fileName}-${key}`}
                         className="flex items-center gap-4"
+                        data-testid={`missing-key-${key}`}
                       >
                         <X className="text-red-400" />
                         <div key={key} className="text-sm">

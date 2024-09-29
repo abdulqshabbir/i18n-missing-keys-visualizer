@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import ReactConfetti from "react-confetti";
 import { useWindowSize } from "react-use";
-import { type MissingKey } from "./types";
+import { type MissingKey } from "@/types";
 import { DragAndDrop } from "./components/DragAndDrop/DragAndDrop";
 
 type GroupedKeys = Record<string, string[]>;

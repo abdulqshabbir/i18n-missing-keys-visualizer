@@ -1,7 +1,7 @@
 import { Check, Drum, FolderUp } from "lucide-react";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { type DragAndDropProps } from "@/pages/types";
+import { type DragAndDropProps } from "@/types";
 
 function isJsonString(str: string) {
   try {

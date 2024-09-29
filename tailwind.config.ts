@@ -18,15 +18,15 @@ export default {
       },
     },
     fontWeight: {
-      normal: '500',
-      bold: '700',
+      normal: "500",
+      bold: "700",
     },
     fontSize: {
-      sm: '14px',
-      md: '20px',
-      lg: '38px',
-      xl: '54px',
-    }
+      sm: "14px",
+      md: "20px",
+      lg: "38px",
+      xl: "54px",
+    },
   },
   plugins: [],
 } satisfies Config;

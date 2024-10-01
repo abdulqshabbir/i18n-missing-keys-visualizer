@@ -55,7 +55,7 @@ export default function Home() {
         <div className="grid grid-cols-1 place-items-center gap-8 rounded-lg bg-purple-200 p-16 lg:grid-cols-[5fr_1fr] lg:px-8">
           <div className="flex flex-col gap-4 text-wrap">
             <h1 className="text-xl font-bold leading-tight text-purple-800">
-              Find React i18n Keys easily
+              Find Missing React i18n Keys easily
             </h1>
             <h3 className="text-md text-purple-800">
               React i18n missing keys visualizer is a tool for developers and

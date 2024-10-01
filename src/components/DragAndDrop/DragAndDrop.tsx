@@ -1,15 +1,15 @@
-import { Check, Drum, FolderUp } from "lucide-react";
-import { useCallback } from "react";
-import { useDropzone } from "react-dropzone";
-import { type DragAndDropProps } from "@/types";
+import { Check, Drum, FolderUp } from "lucide-react"
+import { useCallback } from "react"
+import { useDropzone } from "react-dropzone"
+import { type DragAndDropProps } from "@/types"
 
 function isJsonString(str: string) {
   try {
-    JSON.parse(str);
+    JSON.parse(str)
   } catch (e) {
-    return false;
+    return false
   }
-  return true;
+  return true
 }
 
 function findMissingKeysRecurse(
@@ -17,13 +17,13 @@ function findMissingKeysRecurse(
   missingKeys: string[] = [],
   prefix = "",
 ): string[] {
-  const keys = Object.keys(obj);
+  const keys = Object.keys(obj)
 
   for (const key of keys) {
-    // This is a leaf nod
+    // This is a leaf node
     if (typeof obj[key] === "string") {
       if (obj[key] === "") {
-        missingKeys.push(!prefix ? key : `${prefix}.${key}`);
+        missingKeys.push(key)
       }
     } else {
       // This is a nested object
@@ -31,35 +31,35 @@ function findMissingKeysRecurse(
         obj[key] as Record<string, unknown>,
         missingKeys,
         !prefix ? key : `${prefix}.${key}`,
-      );
+      )
     }
   }
 
-  return missingKeys;
+  return missingKeys
 }
 
 function findNumberOfFilledOrMissingKeysRecurse(
   obj: Record<string, unknown>,
   count = { filledKeys: 0, missingKeys: 0 },
 ) {
-  const keys = Object.keys(obj);
+  const keys = Object.keys(obj)
   for (const key of keys) {
     // This is a leaf nod
     if (typeof obj[key] === "string") {
       if (obj[key] !== "") {
-        count.filledKeys = count.filledKeys + 1;
+        count.filledKeys = count.filledKeys + 1
       } else {
-        count.missingKeys = count.missingKeys + 1;
+        count.missingKeys = count.missingKeys + 1
       }
     } else {
       // This is a nested object
       findNumberOfFilledOrMissingKeysRecurse(
         obj[key] as Record<string, unknown>,
         count,
-      );
+      )
     }
   }
-  return count;
+  return count
 }
 function DragAndDrop({
   isDoneParsing,
@@ -72,41 +72,41 @@ function DragAndDrop({
 }: DragAndDropProps) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      setNumberOfFilledKeys(0);
-      setNumberOfMissingKeys(0);
-      setMissingKeys([]);
-      setIsDoneParsing(false);
-      setFilesParsed(() => []);
+      setNumberOfFilledKeys(0)
+      setNumberOfMissingKeys(0)
+      setMissingKeys([])
+      setIsDoneParsing(false)
+      setFilesParsed(() => [])
       acceptedFiles.forEach((file) => {
-        const reader = new FileReader();
-        reader.readAsText(file);
+        const reader = new FileReader()
+        reader.readAsText(file)
         reader.onloadend = () => {
-          const jsonFile = reader.result;
+          const jsonFile = reader.result
           if (typeof jsonFile !== "string") {
-            return;
+            return
           }
 
           const translationFileAsObject =
             isJsonString(jsonFile) &&
-            (JSON.parse(jsonFile) as unknown as Record<string, unknown>);
+            (JSON.parse(jsonFile) as unknown as Record<string, unknown>)
 
-          if (!translationFileAsObject) return;
+          if (!translationFileAsObject) return
 
-          const keys = findMissingKeysRecurse(translationFileAsObject);
+          const keys = findMissingKeysRecurse(translationFileAsObject)
 
           const { filledKeys, missingKeys } =
-            findNumberOfFilledOrMissingKeysRecurse(translationFileAsObject);
+            findNumberOfFilledOrMissingKeysRecurse(translationFileAsObject)
 
-          setFilesParsed((prev) => [...prev, file.name]);
+          setFilesParsed((prev) => [...prev, file.name])
           setMissingKeys((prevMissingKeys) => [
             ...prevMissingKeys,
             ...keys.map((key) => ({ file: file.name, missingKey: key })),
-          ]);
-          setNumberOfFilledKeys((prev) => prev + filledKeys);
-          setNumberOfMissingKeys((prev) => prev + missingKeys);
-          setIsDoneParsing(true);
-        };
-      });
+          ])
+          setNumberOfFilledKeys((prev) => prev + filledKeys)
+          setNumberOfMissingKeys((prev) => prev + missingKeys)
+          setIsDoneParsing(true)
+        }
+      })
     },
     [
       setFilesParsed,
@@ -115,8 +115,8 @@ function DragAndDrop({
       setNumberOfFilledKeys,
       setNumberOfMissingKeys,
     ],
-  );
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  )
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
   return (
     <div
       {...getRootProps()}
@@ -151,7 +151,7 @@ function DragAndDrop({
         )}
       </div>
     </div>
-  );
+  )
 }
 
-export { DragAndDrop };
+export { DragAndDrop }

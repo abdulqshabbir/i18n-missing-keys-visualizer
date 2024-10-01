@@ -6,6 +6,7 @@ import ReactConfetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { type MissingKey } from "@/types";
 import { DragAndDrop } from "../components/DragAndDrop/DragAndDrop";
+import { Footer } from "../components/Footer/Footer";
 
 type GroupedKeys = Record<string, string[]>;
 
@@ -55,7 +56,7 @@ export default function Home() {
         <div className="grid grid-cols-1 place-items-center gap-8 rounded-lg bg-purple-200 p-16 lg:grid-cols-[5fr_1fr] lg:px-8">
           <div className="flex flex-col gap-4 text-wrap">
             <h1 className="text-xl font-bold leading-tight text-purple-800">
-              Find Missing React i18n Keys easily
+              Find React i18n Keys easily
             </h1>
             <h3 className="text-md text-purple-800">
               React i18n missing keys visualizer is a tool for developers and
@@ -160,15 +161,7 @@ export default function Home() {
           </div>
         )}
 
-        <footer className="flex flex-col items-center justify-center text-secondary">
-          <div className="text-md">Missing Keys Visualizer</div>
-          <div className="text-sm text-gray-500">
-            Built with ❤️ by{" "}
-            <a target="_blank" href="https://github.com/abdulqshabbir">
-              Abdul Shabbir
-            </a>
-          </div>
-        </footer>
+        <Footer />
       </main>
     </>
   );

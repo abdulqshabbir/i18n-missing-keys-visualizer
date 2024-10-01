@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react";
+import { Check, Info, X } from "lucide-react";
 import Head from "next/head";
 import Image from "next/image";
 import { useState } from "react";
@@ -56,7 +56,7 @@ export default function Home() {
         <div className="grid grid-cols-1 place-items-center gap-8 rounded-lg bg-purple-200 p-16 lg:grid-cols-[5fr_1fr] lg:px-8">
           <div className="flex flex-col gap-4 text-wrap">
             <h1 className="text-xl font-bold leading-tight text-purple-800">
-              Find React i18n Keys easily
+              Find Missing i18n Keys Easily
             </h1>
             <h3 className="text-md text-purple-800">
               React i18n missing keys visualizer is a tool for developers and
@@ -94,7 +94,11 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div className="flex flex-col gap-4 rounded-lg bg-gray-100 p-4">
+            <div className="flex gap-4 rounded-lg bg-gray-100 p-4">
+              <div className="flex gap-4">
+                <Info className="text-gray-400" />
+                <p>Summary of keys: </p>
+              </div>
               <div className="flex gap-4">
                 <Check className="text-green-500" />
                 <p>{numberOfFilledKeys} keys filled!</p>
@@ -108,7 +112,7 @@ export default function Home() {
               {Object.keys(groupedKeys).map((fileName) => (
                 <div key={fileName} className="flex flex-col gap-4">
                   <div className="text-md font-bold">{fileName}</div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 bg-gray-100 p-4 rounded-lg">
                     {/* @ts-expect-error grouped keys defined*/}
                     {groupedKeys[fileName].map((key) => (
                       <div

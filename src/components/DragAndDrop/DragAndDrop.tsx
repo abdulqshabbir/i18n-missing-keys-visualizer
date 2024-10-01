@@ -63,7 +63,7 @@ function DragAndDrop({
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} flex h-64 w-64 items-center justify-center p-12 ${isDragActive ? "bg-purple-200" : "bg-primary"} rounded-lg text-md text-secondary`}
+      className={`border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} grid h-64 w-64 place-items-center p-12 ${isDragActive ? "bg-purple-200" : "bg-primary"} rounded-lg text-md text-secondary`}
     >
       <input {...getInputProps()} data-testid="dropzone" />
       {!isDoneParsing && (

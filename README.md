@@ -1,24 +1,27 @@
 # i18n Missing Keys Visualize
 
-## ❔Why does this project exist
+## ❔Why does this project exist?
 
 When I worked on supporting internationalization for
-[Woztell](https://platform.woztell.com/), there was a lot
-of back-and-forth between developers and translators on different
-teams. We didn't want to invest in a continuous localization management
+[Woztell](https://platform.woztell.com/), the developers and translators were working on separate teams.
+We didn't want to invest in a continuous localization management
 platform at the time and so we (the developers) would pass
-zip files back-and-forth to the translators. Unfortunately, in this
-process it was quite easy to miss some translation keys not being filled
-in because translators may not have access to the same
-development tools.
+JSON files to the translators. Unfortunately, this
+process was quite error prone as it was easy for translators
+easy to miss translation keys. This resulted in a lot of
+back-and-forth between the developers and translators. So I
+set out to build a simple user interface that let's small teams
+work on i18n JSON files who don't yet want to pay for continuous
+localization management. Users can easily drag and drop folders
+or individual files and easily see if they are missing translations.
 
 ## 🚀 Features
 
 - 📁 Drag and drop individual JSON files to find missing keys
 - 🗄️ Drag and drop folders containing JSON files to find missing keys
-- ✔️ Locate missing keys
+- ✔️ Locate missing keys for flat or deeply nested JSON objects
 
-🛠️ Main Technologies
+## 🛠️ Main Technologies
 
 - `Next JS (full-stack framework)`
 - `Tailwind CSS (styling)`

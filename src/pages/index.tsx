@@ -41,7 +41,7 @@ export default function Home() {
         <link rel="icon" href="/key.png" />
       </Head>
       <main className="text-primarym mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-8 font-normal">
-        <div className="flex items-center gap-4 text-md text-purple-800">
+        <div className="flex items-center gap-4 text-md text-purple-800 mt-6">
           <Image
             src="/key-no-bg.png"
             alt="logo"
@@ -49,7 +49,7 @@ export default function Home() {
             width={40}
             height={40}
           />
-          <h1 className="px-4 py-6 text-md font-bold">
+          <h1 className="p-2 text-md font-bold">
             Missing Keys Visualizer
           </h1>
         </div>
@@ -79,7 +79,7 @@ export default function Home() {
         )}
         {isDoneParsing && (
           <div className="flex flex-col gap-8 text-secondary">
-            <div className="text-md font-bold text-secondary">Summary:</div>
+            <div className="text-md font-bold">Summary:</div>
             <div className="text-sm text-secondary">
               {filesParsed.length} file{filesParsed.length !== 1 ? "s" : ""}{" "}
               parsed

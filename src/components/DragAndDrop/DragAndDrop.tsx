@@ -2,7 +2,11 @@ import { Check, Drum, FolderUp } from "lucide-react"
 import { useCallback } from "react"
 import { useDropzone } from "react-dropzone"
 import { type DragAndDropProps } from "@/types"
-import { findNumberOfFilledOrMissingKeysRecurse, findMissingKeysRecurse, isJsonString } from "../../utils"
+import {
+  findNumberOfFilledOrMissingKeysRecurse,
+  findMissingKeysRecurse,
+  isJsonString,
+} from "../../utils"
 
 function DragAndDrop({
   isDoneParsing,
@@ -63,7 +67,7 @@ function DragAndDrop({
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} grid h-64 w-64 place-items-center p-12 ${isDragActive ? "bg-purple-200" : "bg-primary"} rounded-lg text-md text-secondary`}
+      className={`cursor-pointer border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} grid h-64 w-64 place-items-center p-12 ${isDragActive ? "bg-purple-200" : "bg-primary"} rounded-lg text-md text-secondary hover:bg-purple-50`}
     >
       <input {...getInputProps()} data-testid="dropzone" />
       {!isDoneParsing && (
@@ -77,7 +81,7 @@ function DragAndDrop({
             <div className="flex flex-col items-center justify-center gap-4 text-sm text-gray-400">
               <FolderUp size={60} />
               <p>
-                Drag &apos;n Drop or click here to upload folders or JSON files
+                Drag &apos;n Drop or Click Here to Upload Folders or JSON files
               </p>
             </div>
           )}

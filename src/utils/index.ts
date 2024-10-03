@@ -30,7 +30,7 @@ function findNumberOfFilledOrMissingKeysRecurse(
 ) {
   const keys = Object.keys(obj)
   for (const key of keys) {
-    // This is a leaf nod
+    // This is a leaf node
     if (typeof obj[key] === "string") {
       if (obj[key] !== "") {
         count.filledKeys = count.filledKeys + 1

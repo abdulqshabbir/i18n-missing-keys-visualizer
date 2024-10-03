@@ -1,7 +1,7 @@
 import { Check, Drum, FolderUp } from "lucide-react"
 import { useCallback } from "react"
 import { useDropzone } from "react-dropzone"
-import { type DragAndDropProps } from "@/types"
+import { type DragAndDropProps } from "../../types"
 import {
   findNumberOfFilledOrMissingKeysRecurse,
   findMissingKeysRecurse,

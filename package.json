@@ -9,8 +9,7 @@
     "lint": "next lint",
     "start": "next start",
     "test": "vitest",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "clean": "rm -rf ./node_modules && rm ./bun.lockb && rm -rf .next"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.1.2",

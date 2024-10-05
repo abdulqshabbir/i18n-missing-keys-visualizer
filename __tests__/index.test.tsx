@@ -132,6 +132,7 @@ describe("App front-end tests", async () => {
     expect(localePicker).toBeInTheDocument()
     expect(screen.getByText("missing_en")).toBeInTheDocument()
     expect(screen.queryByText("missing_fr")).toBe(null)
+
   })
 
   test("it should allow user to switch between missing keys grouped by locale", async () => {

@@ -1,12 +1,14 @@
 import { Check, Drum, FolderUp } from "lucide-react"
 import { useCallback } from "react"
-import { useDropzone } from "react-dropzone"
-import { type DragAndDropProps } from "../../types"
+import { type FileWithPath, useDropzone } from "react-dropzone"
+import { type DragAndDropProps } from "@/types"
 import {
   findNumberOfFilledOrMissingKeysRecurse,
   findMissingKeysRecurse,
   isJsonString,
 } from "../../utils"
+import { DEFAULT_CIPHERS } from "tls"
+import { DEFAULT_LOCALE } from "@/utils/const"
 
 function DragAndDrop({
   isDoneParsing,
@@ -24,7 +26,7 @@ function DragAndDrop({
       setMissingKeys([])
       setIsDoneParsing(false)
       setFilesParsed(() => [])
-      acceptedFiles.forEach((file) => {
+      acceptedFiles.forEach((file: FileWithPath) => {
         const reader = new FileReader()
         reader.readAsText(file)
         reader.onloadend = () => {
@@ -39,7 +41,15 @@ function DragAndDrop({
 
           if (!translationFileAsObject) return
 
-          const keys = findMissingKeysRecurse(translationFileAsObject)
+          const missingKeysWithLocale = findMissingKeysRecurse(
+            translationFileAsObject,
+            file.name,
+            file?.path,
+          )
+
+          console.log({
+            missingKeysWithLocale,
+          })
 
           const { filledKeys, missingKeys } =
             findNumberOfFilledOrMissingKeysRecurse(translationFileAsObject)
@@ -47,7 +57,11 @@ function DragAndDrop({
           setFilesParsed((prev) => [...prev, file.name])
           setMissingKeys((prevMissingKeys) => [
             ...prevMissingKeys,
-            ...keys.map((key) => ({ file: file.name, missingKey: key })),
+            ...missingKeysWithLocale.map((key) => ({
+              file: file.name,
+              missingKey: key.key,
+              locale: key.locale ?? DEFAULT_LOCALE,
+            })),
           ])
           setNumberOfFilledKeys((prev) => prev + filledKeys)
           setNumberOfMissingKeys((prev) => prev + missingKeys)
@@ -67,7 +81,7 @@ function DragAndDrop({
   return (
     <div
       {...getRootProps()}
-      className={`cursor-pointer border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} grid h-64 w-64 place-items-center p-12 ${isDragActive ? "bg-purple-200" : "bg-primary"} rounded-lg text-md text-secondary hover:bg-purple-50`}
+      className={`cursor-pointer border-2 border-dashed ${isDragActive ? "border-purple-500" : "border-purple-500"} grid h-64 w-64 place-items-center p-12 ${isDragActive ? "bg-purple-200" : "bg-white"} rounded-lg text-md text-primary hover:bg-purple-50`}
     >
       <input {...getInputProps()} data-testid="dropzone" />
       {!isDoneParsing && (
@@ -87,7 +101,7 @@ function DragAndDrop({
           )}
         </>
       )}
-      <div className="flex items-center justify-center text-secondary lg:w-2/3">
+      <div className="flex items-center justify-center text-primary lg:w-2/3">
         {isDoneParsing && (
           <div className="flex flex-col items-center justify-center gap-4 text-sm text-gray-400">
             <Check size={60} className="text-green-500" />

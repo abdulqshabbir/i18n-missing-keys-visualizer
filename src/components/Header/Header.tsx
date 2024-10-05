@@ -2,7 +2,7 @@ import Image from "next/image"
 
 function Header() {
   return (
-    <header className="flex items-center gap-4 text-md text-purple-800 mt-6">
+    <header className=" flex items-center gap-4 text-md text-purple-800 mt-6">
       <Image
         src="/key-no-bg.png"
         alt="logo"

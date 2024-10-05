@@ -1,6 +1,6 @@
 function Footer() {
   return (
-    <footer className="flex flex-col items-center justify-center text-secondary">
+    <footer className="flex flex-col items-center justify-center text-primary">
       <div className="text-md">Missing Keys Visualizer</div>
       <div className="text-sm text-gray-500">
         Built with ❤️ by{" "}
@@ -12,6 +12,4 @@ function Footer() {
   )
 }
 
-export {
-  Footer
-}
+export { Footer }

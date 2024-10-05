@@ -1,14 +1,15 @@
 import ReactConfetti from "react-confetti"
-import { DocumentHead } from "../DocumentHead/DocumentHead"
-import { DragAndDrop } from "../DragAndDrop/DragAndDrop"
-import { Footer } from "../Footer/Footer"
-import { Header } from "../Header/Header"
-import { HeroText } from "../HeroText/HeroText"
-import { type Dispatch, type SetStateAction } from "react"
-import { type MissingKey } from "../../types"
-import { type GroupedKeys } from "../../pages"
+import { DocumentHead } from "@/components/DocumentHead/DocumentHead"
+import { DragAndDrop } from "@/components/DragAndDrop/DragAndDrop"
+import { Footer } from "@/components/Footer/Footer"
+import { Header } from "@/components/Header/Header"
+import { HeroText } from "@/components/HeroText/HeroText"
+import { useState, type Dispatch, type SetStateAction } from "react"
+import { type MissingKey } from "@/types"
 import { Info, Check, X } from "lucide-react"
 import { useWindowSize } from "react-use"
+import { LocaleListPicker } from "@/components/LocalePicker/LocalePicker"
+import { DEFAULT_LOCALE, localeCodeToLabelMap } from "@/utils/const"
 
 type FilesParsedView = {
   isDoneParsing: boolean
@@ -20,7 +21,7 @@ type FilesParsedView = {
   filesParsed: string[]
   numberOfMissingKeys: number
   numberOfFilledKeys: number
-  groupedKeys: GroupedKeys
+  missingKeys: MissingKey[]
 }
 
 function FilesParsedView({
@@ -33,7 +34,7 @@ function FilesParsedView({
   filesParsed,
   numberOfMissingKeys,
   numberOfFilledKeys,
-  groupedKeys,
+  missingKeys,
 }: FilesParsedView) {
   const { width, height } = useWindowSize(1000, 1000)
   return (
@@ -56,13 +57,13 @@ function FilesParsedView({
             filesParsed={filesParsed}
           />
         </div>
-        <div className="flex flex-col gap-8 text-secondary">
+        <div className="flex flex-col gap-8 text-primary">
           <SummaryOfFiles filesParsed={filesParsed} />
           <SummaryOfNumberOfFilledAndMissingKeys
             numberOfMissingKeys={numberOfMissingKeys}
             numberOfFilledKeys={numberOfFilledKeys}
           />
-          <SummaryOfMissingKeys groupedKeys={groupedKeys} />
+          <SummaryOfMissingKeys missingKeys={missingKeys} />
         </div>
         <Footer />
       </main>
@@ -73,14 +74,14 @@ function SummaryOfFiles({ filesParsed = [] }: { filesParsed: string[] }) {
   return (
     <>
       <div className="text-md font-bold">Summary:</div>
-      <div className="text-sm text-secondary">
+      <div className="text-sm text-primary">
         {filesParsed.length} file{filesParsed.length !== 1 ? "s" : ""} parsed
       </div>
       <div className="flex flex-wrap gap-4">
-        {filesParsed.map((file) => (
+        {filesParsed.map((file, idx) => (
           <div
-            className="rounded-sm bg-gray-100 px-2 py-1 text-sm text-secondary"
-            key={file}
+            className="rounded-sm bg-gray-100 px-2 py-1 text-sm text-primary"
+            key={`file-${idx}`}
           >
             {file}
           </div>
@@ -100,7 +101,7 @@ function SummaryOfNumberOfFilledAndMissingKeys({
     <div className="flex gap-4 rounded-lg bg-gray-100 p-4">
       <div className="flex gap-4">
         <Info className="text-gray-400" />
-        <p>Ssmmary of keys: </p>
+        <p>Summary of keys: </p>
       </div>
       <div className="flex gap-4">
         <Check className="text-green-500" />
@@ -113,26 +114,112 @@ function SummaryOfNumberOfFilledAndMissingKeys({
     </div>
   )
 }
-function SummaryOfMissingKeys({ groupedKeys }: { groupedKeys: GroupedKeys }) {
+
+const groupMissingKeysByLocale = (missingKeys: MissingKey[]) => {
+  return missingKeys.reduce(
+    (acc: Record<string, MissingKey[]>, missingKey: MissingKey) => {
+      const missingKeyLocale = missingKey.locale ?? DEFAULT_LOCALE
+      if (acc[missingKeyLocale]) {
+        acc[missingKeyLocale].push(missingKey)
+      } else {
+        acc[missingKeyLocale] = [missingKey]
+      }
+      return acc
+    },
+    {},
+  )
+}
+
+const groupMissingKeysByFileName = (missingKeys: MissingKey[]) => {
+  return missingKeys.reduce(
+    (acc: Record<string, MissingKey[]>, missingKey: MissingKey) => {
+      const missingKeyFile = missingKey.file
+      if (acc[missingKeyFile]) {
+        acc[missingKeyFile].push(missingKey)
+      } else {
+        acc[missingKeyFile] = [missingKey]
+      }
+      return acc
+    },
+    {},
+  )
+}
+
+function SummaryOfMissingKeys({ missingKeys }: { missingKeys: MissingKey[] }) {
+  const groupedMissingKeys = groupMissingKeysByLocale(missingKeys)
+  const [languageSelected, setLanguageSelected] = useState<string>(
+    Object.keys(groupedMissingKeys)[0] ?? DEFAULT_LOCALE,
+  )
+  const generateUniqueKey = (
+    file: string,
+    key: string,
+    locale: string | null,
+  ) => `${file}-${key}-${locale}`
+
+  const onlyDefaultLocale =
+    Object.keys(groupedMissingKeys).length === 1 &&
+    Object.keys(groupedMissingKeys)[0] === DEFAULT_LOCALE
+
+  const atLeastOneMissingKey = missingKeys.length > 0
+
+  const missingKeysGroupedByFileName = groupMissingKeysByFileName(
+    missingKeys.filter((mk) => mk.locale === languageSelected),
+  )
+
+  const IS_DEFAULT_LOCALE = languageSelected === DEFAULT_LOCALE
+
+  if (missingKeys.length === 0) {
+    return null
+  }
+
   return (
     <div className="flex flex-col gap-8">
-      {Object.keys(groupedKeys).map((fileName) => (
+      {(!onlyDefaultLocale || atLeastOneMissingKey) && (
+        <div className="flex justify-between items-center">
+          <div className="text-primary text-md font-bold">
+            {IS_DEFAULT_LOCALE ? (
+              <>Missing Keys</>
+            ) : (
+              <>Missing Keys in {localeCodeToLabelMap[languageSelected]}</>
+            )}
+          </div>
+          <div>
+            <LocaleListPicker
+              onChange={(l) => setLanguageSelected(l)}
+              locales={Object.keys(groupedMissingKeys)}
+            />
+          </div>
+        </div>
+      )}
+      {Object.keys(missingKeysGroupedByFileName).map((fileName) => (
         <div key={fileName} className="flex flex-col gap-4">
-          <div className="text-md font-bold">{fileName}</div>
+          <div className="text-md">{fileName}</div>
           <div className="flex flex-col gap-2 bg-gray-100 p-4 rounded-lg">
-            {/* @ts-expect-error grouped keys defined*/}
-            {groupedKeys[fileName].map((key) => (
-              <div
-                key={`${fileName}-${key}`}
-                className="flex items-center gap-4"
-                data-testid={`missing-key-${key}`}
-              >
-                <X className="text-red-400" />
-                <div key={key} className="text-sm">
-                  {key}
+            {(missingKeysGroupedByFileName[fileName] ?? []).map(
+              (missingKey: MissingKey) => (
+                <div
+                  key={generateUniqueKey(
+                    missingKey.file,
+                    missingKey.missingKey,
+                    missingKey.locale,
+                  )}
+                  data-testid={`missing-key-${missingKey.missingKey}`}
+                  className="flex flex-row gap-4"
+                >
+                  <X className="text-red-400" />
+                  <div
+                    key={generateUniqueKey(
+                      missingKey.file,
+                      missingKey.missingKey,
+                      missingKey.locale,
+                    )}
+                    className="text-sm"
+                  >
+                    {missingKey.missingKey}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </div>
       ))}

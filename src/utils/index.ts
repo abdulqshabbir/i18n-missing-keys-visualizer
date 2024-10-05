@@ -1,20 +1,41 @@
+import { localeMap } from "@/utils/const"
+
+type MissingKeyWithLocale = {
+  locale: string | null
+  key: string
+}
+
 function findMissingKeysRecurse(
   obj: Record<string, unknown>,
-  missingKeys: string[] = [],
+  fileName: string,
+  filePath: string | undefined,
+  missingKeys: MissingKeyWithLocale[] = [],
   prefix = "",
-): string[] {
+): MissingKeyWithLocale[] {
   const keys = Object.keys(obj)
 
   for (const key of keys) {
     // This is a leaf node
     if (typeof obj[key] === "string") {
       if (obj[key] === "") {
-        missingKeys.push(key)
+        const filePathSplitBySlash = filePath?.split("/") ?? null
+
+        let keyLocale = null
+        if (filePathSplitBySlash) {
+          filePathSplitBySlash.forEach((subPath) => {
+            if (localeMap[subPath]) {
+              keyLocale = localeMap[subPath]
+            }
+          })
+        }
+        missingKeys.push({ key, locale: keyLocale })
       }
     } else {
       // This is a nested object
       findMissingKeysRecurse(
         obj[key] as Record<string, unknown>,
+        fileName,
+        filePath,
         missingKeys,
         !prefix ? key : `${prefix}.${key}`,
       )

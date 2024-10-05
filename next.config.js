@@ -14,6 +14,6 @@ const config = {
   transpilePackages: ["geist"],
   // Warning: This allows production builds to successfully complete even if
   // your project has ESLint errors.
-};
+}
 
-export default config;
+export default config

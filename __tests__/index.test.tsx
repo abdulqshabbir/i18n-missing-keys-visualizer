@@ -1,7 +1,7 @@
 import { test, expect, describe } from "vitest"
 import { render, screen } from "@testing-library/react"
 import "@testing-library/jest-dom"
-import App from "../src/pages/index.jsx"
+import App from "@/pages/index"
 import userEvent from "@testing-library/user-event"
 import "vitest-canvas-mock"
 

@@ -19,7 +19,8 @@ or individual files and easily see if they are missing translations.
 
 - 📁 Drag and drop individual JSON files to find missing keys
 - 🗄️ Drag and drop folders containing JSON files to find missing keys
-- ✔️ Locate missing keys for flat or deeply nested JSON objects
+- ✔️  Locate missing keys for flat or deeply nested JSON objects
+- 🍱 Group missing keys by their 18n language code
 
 ## 🛠️ Main Technologies
 

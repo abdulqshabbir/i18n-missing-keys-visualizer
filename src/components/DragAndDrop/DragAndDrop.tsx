@@ -47,10 +47,6 @@ function DragAndDrop({
             file?.path,
           )
 
-          console.log({
-            missingKeysWithLocale,
-          })
-
           const { filledKeys, missingKeys } =
             findNumberOfFilledOrMissingKeysRecurse(translationFileAsObject)
 

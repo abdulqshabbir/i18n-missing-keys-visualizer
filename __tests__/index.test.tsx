@@ -1,4 +1,4 @@
-import { test, expect, describe } from "vitest"
+import { test, expect, describe, vitest } from "vitest"
 import { render, screen } from "@testing-library/react"
 import "@testing-library/jest-dom"
 import App from "@/pages/index"
@@ -106,5 +106,61 @@ describe("App front-end tests", async () => {
 
     expect(screen.getByText(FILES_PARSED_REGEX)).toBeInTheDocument()
     expect(screen.getByTestId("confetti")).toBeInTheDocument()
+  })
+
+  test("it should render a locale picker if there are missing keys from more than one locale", async () => {
+    window.HTMLElement.prototype.hasPointerCapture = vitest.fn()
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    window.HTMLElement.prototype.scrollIntoView = function () {}
+
+    render(<App />)
+
+    const files = [
+      new File(['{"missing_en": ""}'], "locales/en/en.json", {
+        type: "application/json",
+      }),
+      new File(['{"missing_fr": ""}'], "locales/fr/fr.json", {
+        type: "application/json",
+      }),
+    ]
+
+    const uploadButton = screen.getByTestId("dropzone")
+    await userEvent.upload(uploadButton, files)
+    await screen.findByText(FILES_PARSED_REGEX)
+    const localePicker = screen.getByRole("combobox")
+
+    expect(localePicker).toBeInTheDocument()
+    expect(screen.getByText("missing_en")).toBeInTheDocument()
+    expect(screen.queryByText("missing_fr")).toBe(null)
+
+  })
+
+  test("it should allow user to switch between missing keys grouped by locale", async () => {
+    window.HTMLElement.prototype.hasPointerCapture = vitest.fn()
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    window.HTMLElement.prototype.scrollIntoView = function () {}
+
+    render(<App />)
+
+    const files = [
+      new File(['{"missing_en": ""}'], "locales/en/en.json", {
+        type: "application/json",
+      }),
+      new File(['{"missing_fr": ""}'], "locales/fr/fr.json", {
+        type: "application/json",
+      }),
+    ]
+
+    const uploadButton = screen.getByTestId("dropzone")
+    await userEvent.upload(uploadButton, files)
+    await screen.findByText(FILES_PARSED_REGEX)
+    const localePicker = screen.getByRole("combobox")
+
+    await userEvent.click(localePicker)
+    const frenchOption = screen.getByText(/french.*general.*/i)
+    await userEvent.click(frenchOption)
+
+    expect(screen.getByText("missing_fr")).toBeInTheDocument()
+    expect(screen.queryByText("missing_en")).toBe(null)
   })
 })

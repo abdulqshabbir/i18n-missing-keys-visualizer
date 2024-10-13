@@ -4,39 +4,25 @@ import { DragAndDrop } from "@/components/DragAndDrop/DragAndDrop"
 import { Footer } from "@/components/Footer/Footer"
 import { Header } from "@/components/Header/Header"
 import { HeroText } from "@/components/HeroText/HeroText"
-import { useState, type Dispatch, type SetStateAction } from "react"
+import { useState } from "react"
 import { type MissingKey } from "@/types"
-import { Info, Check, X } from "lucide-react"
+import { Info, Check, X, Edit2 } from "lucide-react"
 import { useWindowSize } from "react-use"
 import { LocaleListPicker } from "@/components/LocalePicker/LocalePicker"
 import { DEFAULT_LOCALE, localeCodeToLabelMap } from "@/utils/const"
+import { EditableJSONBuffer } from "@/components/JSONEditor/JSONEditor"
+import { useAtomValue } from "jotai"
+import {
+  filesAtom,
+  missingKeysAtom,
+  numberOfFilledKeysAtom,
+  numberOfMissingKeysAtom,
+} from "@/atoms"
+import { type FileWithPath } from "react-dropzone"
 
-type FilesParsedView = {
-  isDoneParsing: boolean
-  setNumberOfMissingKeys: Dispatch<SetStateAction<number>>
-  setNumberOfFilledKeys: Dispatch<SetStateAction<number>>
-  setMissingKeys: Dispatch<SetStateAction<MissingKey[]>>
-  setFilesParsed: Dispatch<SetStateAction<string[]>>
-  setIsDoneParsing: Dispatch<SetStateAction<boolean>>
-  filesParsed: string[]
-  numberOfMissingKeys: number
-  numberOfFilledKeys: number
-  missingKeys: MissingKey[]
-}
-
-function FilesParsedView({
-  isDoneParsing,
-  setNumberOfMissingKeys,
-  setNumberOfFilledKeys,
-  setMissingKeys,
-  setFilesParsed,
-  setIsDoneParsing,
-  filesParsed,
-  numberOfMissingKeys,
-  numberOfFilledKeys,
-  missingKeys,
-}: FilesParsedView) {
+function FilesParsedView() {
   const { width, height } = useWindowSize(1000, 1000)
+  const numberOfMissingKeys = useAtomValue(numberOfMissingKeysAtom)
   return (
     <>
       {numberOfMissingKeys === 0 && (
@@ -47,56 +33,69 @@ function FilesParsedView({
         <Header />
         <div className="grid grid-cols-1 place-items-center gap-8 rounded-lg bg-purple-200 p-16 lg:grid-cols-[5fr_1fr] lg:px-8">
           <HeroText />
-          <DragAndDrop
-            isDoneParsing={isDoneParsing}
-            setNumberOfMissingKeys={setNumberOfMissingKeys}
-            setNumberOfFilledKeys={setNumberOfFilledKeys}
-            setMissingKeys={setMissingKeys}
-            setFilesParsed={setFilesParsed}
-            setIsDoneParsing={setIsDoneParsing}
-            filesParsed={filesParsed}
-          />
+          <DragAndDrop />
         </div>
         <div className="flex flex-col gap-8 text-primary">
-          <SummaryOfFiles filesParsed={filesParsed} />
-          <SummaryOfNumberOfFilledAndMissingKeys
-            numberOfMissingKeys={numberOfMissingKeys}
-            numberOfFilledKeys={numberOfFilledKeys}
-          />
-          <SummaryOfMissingKeys missingKeys={missingKeys} />
+          <SummaryOfNumberOfFilledAndMissingKeys />
+          <SummaryOfFiles />
+          <SummaryOfMissingKeys />
         </div>
         <Footer />
       </main>
     </>
   )
 }
-function SummaryOfFiles({ filesParsed = [] }: { filesParsed: string[] }) {
+
+function SummaryOfFiles() {
+  const [editingFile, setEditingFile] = useState(false)
+  const filesParsed = useAtomValue(filesAtom)
+  const [selectedFilePath, setSelectedFilePath] = useState<string | undefined>()
+
+  const missingKeys = useAtomValue(missingKeysAtom)
+  const missingKeysGroupedByFileName = groupMissingKeysByFileName(missingKeys)
+  const numberOFMissingKeysByFile = (fileName: string) =>
+    missingKeysGroupedByFileName[fileName]?.length ?? 0
   return (
     <>
-      <div className="text-md font-bold">Summary:</div>
-      <div className="text-sm text-primary">
-        {filesParsed.length} file{filesParsed.length !== 1 ? "s" : ""} parsed
-      </div>
       <div className="flex flex-wrap gap-4">
-        {filesParsed.map((file, idx) => (
+        {filesParsed.map((file: FileWithPath, idx) => (
           <div
-            className="rounded-sm bg-gray-100 px-2 py-1 text-sm text-primary"
+            className="rounded-sm bg-gray-100 px-2 py-1 text-sm text-primary flex items-center gap-2"
             key={`file-${idx}`}
           >
-            {file}
+            {file.name}
+            {numberOFMissingKeysByFile(file.name) > 0 ? (
+              <X className="text-red-500" />
+            ) : (
+              <Check className="text-green-500" />
+            )}
+            <button
+              onClick={() => {
+                if (!file.path) return
+                setSelectedFilePath(file.path)
+                setEditingFile(true)
+              }}
+              className="text-blue-500 hover:text-blue-700"
+              data-testid={`edit-file-${file.name}`}
+            >
+              <Edit2 size={16} />
+            </button>
           </div>
         ))}
       </div>
+      {editingFile && selectedFilePath && (
+        <EditableJSONBuffer
+          selectedFilePath={selectedFilePath}
+          onClose={() => setEditingFile(false)}
+        />
+      )}
     </>
   )
 }
-function SummaryOfNumberOfFilledAndMissingKeys({
-  numberOfFilledKeys,
-  numberOfMissingKeys,
-}: {
-  numberOfFilledKeys: number
-  numberOfMissingKeys: number
-}) {
+
+function SummaryOfNumberOfFilledAndMissingKeys() {
+  const numberOfFilledKeys = useAtomValue(numberOfFilledKeysAtom)
+  const numberOfMissingKeys = useAtomValue(numberOfMissingKeysAtom)
   return (
     <div className="flex gap-4 rounded-lg bg-gray-100 p-4">
       <div className="flex gap-4">
@@ -145,7 +144,8 @@ const groupMissingKeysByFileName = (missingKeys: MissingKey[]) => {
   )
 }
 
-function SummaryOfMissingKeys({ missingKeys }: { missingKeys: MissingKey[] }) {
+function SummaryOfMissingKeys() {
+  const missingKeys = useAtomValue(missingKeysAtom)
   const groupedMissingKeys = groupMissingKeysByLocale(missingKeys)
   const [languageSelected, setLanguageSelected] = useState<string>(
     Object.keys(groupedMissingKeys)[0] ?? DEFAULT_LOCALE,

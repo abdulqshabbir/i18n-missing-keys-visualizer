@@ -4,28 +4,8 @@ import { DragAndDrop } from "@/components/DragAndDrop/DragAndDrop"
 import { Footer } from "@/components/Footer/Footer"
 import { Header } from "@/components/Header/Header"
 import { HeroText } from "@/components/HeroText/HeroText"
-import { type Dispatch, type SetStateAction } from "react"
-import { type MissingKey } from "@/types"
 
-type FilesNotParsedViewProps = {
-  isDoneParsing: boolean
-  setNumberOfMissingKeys: Dispatch<SetStateAction<number>>
-  setNumberOfFilledKeys: Dispatch<SetStateAction<number>>
-  setMissingKeys: Dispatch<SetStateAction<MissingKey[]>>
-  setFilesParsed: Dispatch<SetStateAction<string[]>>
-  setIsDoneParsing: Dispatch<SetStateAction<boolean>>
-  filesParsed: string[]
-}
-
-function FilesNotParsedView({
-  isDoneParsing,
-  setNumberOfMissingKeys,
-  setNumberOfFilledKeys,
-  setMissingKeys,
-  setFilesParsed,
-  setIsDoneParsing,
-  filesParsed,
-}: FilesNotParsedViewProps) {
+function FilesNotParsedView() {
   return (
     <>
       <DocumentHead />
@@ -33,15 +13,7 @@ function FilesNotParsedView({
         <Header />
         <div className="grid grid-cols-1 place-items-center gap-8 rounded-lg bg-purple-200 p-16 lg:grid-cols-[5fr_1fr] lg:px-8">
           <HeroText />
-          <DragAndDrop
-            isDoneParsing={isDoneParsing}
-            setNumberOfMissingKeys={setNumberOfMissingKeys}
-            setNumberOfFilledKeys={setNumberOfFilledKeys}
-            setMissingKeys={setMissingKeys}
-            setFilesParsed={setFilesParsed}
-            setIsDoneParsing={setIsDoneParsing}
-            filesParsed={filesParsed}
-          />
+          <DragAndDrop />
         </div>
         <Features />
         <Footer />

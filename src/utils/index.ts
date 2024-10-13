@@ -1,6 +1,6 @@
 import { localeMap } from "@/utils/const"
 
-type MissingKeyWithLocale = {
+export type MissingKeyWithLocale = {
   locale: string | null
   key: string
 }
@@ -46,9 +46,10 @@ function findMissingKeysRecurse(
 }
 
 function findNumberOfFilledOrMissingKeysRecurse(
-  obj: Record<string, unknown>,
+  obj: Record<string, unknown> | undefined,
   count = { filledKeys: 0, missingKeys: 0 },
 ) {
+  if (!obj) return count
   const keys = Object.keys(obj)
   for (const key of keys) {
     // This is a leaf node

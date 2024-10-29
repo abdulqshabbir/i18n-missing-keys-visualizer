@@ -122,7 +122,7 @@ function SummaryOfFiles() {
                 setSelectedFilePath(file.path)
                 setEditingFile(true)
               }}
-              className="text-blue-500 hover:text-blue-700"
+              className="text-blue-500 hover:text-blue-700 hover:bg-gray-200 p-1 rounded-sm"
               data-testid={`edit-file-${file.name}`}
             >
               <Edit2 size={16} />

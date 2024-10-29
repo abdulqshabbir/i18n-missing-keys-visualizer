@@ -59,7 +59,9 @@ function EditableJSONBuffer({
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overscroll-contain"
     >
       <div className="bg-white p-4 rounded-lg w-3/4 h-3/4 flex flex-col overscroll-contain">
-        <h2 className="text-lg font-bold mb-2">{filename}</h2>
+        <h2 className="text-md font-bold mb-2 text-purple-800">
+          Editing {filename}
+        </h2>
         <div className="flex-grow border p-2 mb-4 overflow-hidden overscroll-contain">
           {jsonError && (
             <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded">

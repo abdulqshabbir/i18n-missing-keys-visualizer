@@ -1,6 +1,6 @@
 import React from "react"
 import { it, expect } from "vitest"
-import { render, screen } from "./helpers"
+import { render, screen } from "@/lib/test_setup"
 import App from "@/pages"
 import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom"
@@ -13,7 +13,7 @@ const files = [
   }),
 ]
 
-it("renders file names and edit buttons", async () => {
+it("renders file names", async () => {
   render(<App />)
 
   const uploadButton = screen.getByTestId("dropzone")

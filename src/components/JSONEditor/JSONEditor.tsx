@@ -1,12 +1,12 @@
 import { filePathToContentAtom } from "@/atoms"
-import { useAtomValue } from "jotai"
-import dynamic from "next/dynamic"
+import { useAtom } from "jotai"
 import { useState } from "react"
-import { type InteractionProps } from "react-json-view"
+import AceEditor from "react-ace"
 
-const ReactJson = dynamic(import("react-json-view"), { ssr: false })
+import "ace-builds/src-noconflict/mode-json"
+import "ace-builds/src-noconflict/theme-github"
+import "ace-builds/src-noconflict/ext-language_tools"
 
-// Add this new component
 type EditableFileBufferProps = {
   onClose: () => void
   selectedFilePath: string
@@ -16,60 +16,79 @@ function EditableJSONBuffer({
   onClose,
   selectedFilePath,
 }: EditableFileBufferProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-  const filePathToContent = useAtomValue(filePathToContentAtom)
-  const [content, setContent] = useState<object>(
-    filePathToContent[selectedFilePath]!,
+  const [filePathToContent, setFilePathToContent] = useAtom(
+    filePathToContentAtom,
+  )
+  const [content, setContent] = useState<string>(
+    JSON.stringify(filePathToContent[selectedFilePath] ?? {}),
   )
 
-  // const handleSave = (p: InteractionProps) => {
-  //   console.log("", {
-  //     updated_src: p.updated_src,
-  //     name: p.name,
-  //     new_value: p.new_value,
-  //     existing_value: p.existing_value,
-  //   })
-  //   // onSave(JSON.stringify(editedContent, null, 2))
-  //   onClose()
-  // }
-  const handleEdit = (interaction: InteractionProps) => {
-    setContent(interaction.updated_src)
-  }
+  const [jsonError, setJsonError] = useState<string | null>(null)
+  const filename = selectedFilePath.split("/").pop() ?? selectedFilePath
 
   const handleSave = async () => {
-    // await handleZipFileDownload({
-    //   filePathToContent,
-    // })
+    let isError = null
+    try {
+      JSON.parse(content)
+      setJsonError(null)
+    } catch (e) {
+      setJsonError((e as Error).message)
+      isError = true
+    }
+    if (isError) return
+    setFilePathToContent((prev) => ({
+      ...prev,
+      [selectedFilePath]: JSON.parse(content) as object,
+    }))
+    onClose()
+  }
+
+  const handleChange = (newValue: string) => {
+    try {
+      setContent(newValue)
+      JSON.parse(newValue)
+      setJsonError(null)
+    } catch (e) {
+      setJsonError((e as Error).message)
+    }
   }
 
   return (
     <div
       role="dialog"
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overscroll-contain"
     >
-      <div className="bg-white p-4 rounded-lg w-3/4 h-3/4 flex flex-col">
-        <h2 className="text-lg font-bold mb-2">{}</h2>
-        {/* {error ? ( */}
-        {/*   <div className="text-red-500 mb-2">{error}</div> */}
-        {/* ) : ( */}
-        <div className="flex-grow border p-2 mb-4 overflow-auto">
-          <ReactJson
-            theme="bright:inverted"
-            name={null}
-            src={content}
-            defaultValue="string"
-            onEdit={handleEdit}
-            onDelete={handleEdit}
-            displayDataTypes={false}
-            enableClipboard={true}
+      <div className="bg-white p-4 rounded-lg w-3/4 h-3/4 flex flex-col overscroll-contain">
+        <h2 className="text-lg font-bold mb-2">{filename}</h2>
+        <div className="flex-grow border p-2 mb-4 overflow-hidden overscroll-contain">
+          {jsonError && (
+            <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+              Invalid JSON: {jsonError}
+            </div>
+          )}
+          <AceEditor
+            mode="json"
+            wrapEnabled
+            theme="github"
+            onChange={handleChange}
+            value={formatString(content)}
+            name="json-editor"
+            editorProps={{ $blockScrolling: true }}
+            setOptions={{
+              enableBasicAutocompletion: true,
+              enableLiveAutocompletion: true,
+              tabSize: 2,
+            }}
+            tabSize={2}
+            width="100%"
+            height="410px"
           />
         </div>
-        {/* )} */}
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 mt-4">
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
             onClick={handleSave}
-            // disabled={!!error}
+            disabled={!!jsonError}
           >
             Save
           </button>
@@ -80,6 +99,14 @@ function EditableJSONBuffer({
       </div>
     </div>
   )
+}
+
+function formatString(text: string) {
+  let result = text
+  try {
+    result = JSON.stringify(JSON.parse(text), null, 2)
+  } catch (e) {}
+  return result
 }
 
 export { EditableJSONBuffer }

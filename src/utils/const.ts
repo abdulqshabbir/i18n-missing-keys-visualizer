@@ -819,6 +819,11 @@ const localeMap = localeList.reduce((acc: Record<string, string>, locale) => {
   return acc
 }, {})
 
+const localeSet = localeList.reduce((acc: Set<string>, locale: Option) => {
+  acc.add(locale.value)
+  return acc
+}, new Set())
+
 const localeCodeToLabelMap = localeList.reduce(
   (acc: Record<string, string>, locale) => {
     if (locale.value !== DEFAULT_LOCALE) {
@@ -829,4 +834,10 @@ const localeCodeToLabelMap = localeList.reduce(
   {},
 )
 
-export { localeList, localeMap, DEFAULT_LOCALE, localeCodeToLabelMap }
+export {
+  localeList,
+  localeSet,
+  localeMap,
+  DEFAULT_LOCALE,
+  localeCodeToLabelMap,
+}

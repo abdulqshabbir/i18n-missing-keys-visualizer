@@ -6,26 +6,46 @@ import { Header } from "@/components/Header/Header"
 import { HeroText } from "@/components/HeroText/HeroText"
 import { useState } from "react"
 import { type MissingKey } from "@/types"
-import { Info, Check, X, Edit2 } from "lucide-react"
+import { Info, Check, X, Edit2, Download } from "lucide-react"
 import { useWindowSize } from "react-use"
 import { LocaleListPicker } from "@/components/LocalePicker/LocalePicker"
 import { DEFAULT_LOCALE, localeCodeToLabelMap } from "@/utils/const"
 import { EditableJSONBuffer } from "@/components/JSONEditor/JSONEditor"
-import { useAtomValue } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 import {
-  filesAtom,
+  filesByLocaleAtom,
+  localeAtom,
   missingKeysAtom,
-  numberOfFilledKeysAtom,
-  numberOfMissingKeysAtom,
+  missingKeysAtomByLocale,
+  numberOfMissingKeysByFilePathAtom,
+  totalNumberOfFilledKeysForLocale,
+  totalNumberOfMissingKeysForLocale,
 } from "@/atoms"
 import { type FileWithPath } from "react-dropzone"
+import { Button } from "@/components/ui/button"
+import { handleZipFileDownload } from "@/lib/file-saver"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 function FilesParsedView() {
   const { width, height } = useWindowSize(1000, 1000)
-  const numberOfMissingKeys = useAtomValue(numberOfMissingKeysAtom)
+  const filesByLocale = useAtomValue(filesByLocaleAtom)
+  const totalMissingKeys = useAtomValue(totalNumberOfMissingKeysForLocale)
+
+  const handleDownload = async () => {
+    try {
+      await handleZipFileDownload()
+    } finally {
+    }
+  }
+
   return (
     <>
-      {numberOfMissingKeys === 0 && (
+      {totalMissingKeys === 0 && (
         <ReactConfetti width={width} height={height} data-testid="confetti" />
       )}
       <DocumentHead />
@@ -36,7 +56,33 @@ function FilesParsedView() {
           <DragAndDrop />
         </div>
         <div className="flex flex-col gap-8 text-primary">
-          <SummaryOfNumberOfFilledAndMissingKeys />
+          <div className="flex justify-between items-center">
+            <SummaryOfNumberOfFilledAndMissingKeys />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Button
+                      onClick={handleDownload}
+                      variant="default"
+                      disabled={
+                        filesByLocale.length === 0 || totalMissingKeys > 0
+                      }
+                      data-testid="download-button"
+                    >
+                      <Download />
+                      Download Files
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {totalMissingKeys > 0 && (
+                  <TooltipContent>
+                    <p>Fill missing keys before downloading</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <SummaryOfFiles />
           <SummaryOfMissingKeys />
         </div>
@@ -47,14 +93,14 @@ function FilesParsedView() {
 }
 
 function SummaryOfFiles() {
-  const [editingFile, setEditingFile] = useState(false)
-  const filesParsed = useAtomValue(filesAtom)
   const [selectedFilePath, setSelectedFilePath] = useState<string | undefined>()
+  const [editingFile, setEditingFile] = useState(false)
 
-  const missingKeys = useAtomValue(missingKeysAtom)
-  const missingKeysGroupedByFileName = groupMissingKeysByFileName(missingKeys)
-  const numberOFMissingKeysByFile = (fileName: string) =>
-    missingKeysGroupedByFileName[fileName]?.length ?? 0
+  const filesParsed = useAtomValue(filesByLocaleAtom)
+  const numberOfMissingKeysByFilePath = useAtomValue(
+    numberOfMissingKeysByFilePathAtom,
+  )
+
   return (
     <>
       <div className="flex flex-wrap gap-4">
@@ -64,7 +110,8 @@ function SummaryOfFiles() {
             key={`file-${idx}`}
           >
             {file.name}
-            {numberOFMissingKeysByFile(file.name) > 0 ? (
+            {file.path !== undefined &&
+            numberOfMissingKeysByFilePath[file.path]! > 0 ? (
               <X className="text-red-500" />
             ) : (
               <Check className="text-green-500" />
@@ -94,21 +141,21 @@ function SummaryOfFiles() {
 }
 
 function SummaryOfNumberOfFilledAndMissingKeys() {
-  const numberOfFilledKeys = useAtomValue(numberOfFilledKeysAtom)
-  const numberOfMissingKeys = useAtomValue(numberOfMissingKeysAtom)
+  const totalFilledKeys = useAtomValue(totalNumberOfFilledKeysForLocale)
+  const totalMissingKeys = useAtomValue(totalNumberOfMissingKeysForLocale)
   return (
-    <div className="flex gap-4 rounded-lg bg-gray-100 p-4">
+    <div className="flex gap-8 rounded-lg bg-gray-100 p-4">
       <div className="flex gap-4">
         <Info className="text-gray-400" />
         <p>Summary of keys: </p>
       </div>
       <div className="flex gap-4">
         <Check className="text-green-500" />
-        <p>{numberOfFilledKeys} keys filled!</p>
+        <p>{totalFilledKeys} keys filled!</p>
       </div>
       <div className="flex gap-4">
         <X className="text-red-400" />
-        <p>{numberOfMissingKeys} keys missing</p>
+        <p>{totalMissingKeys} keys missing</p>
       </div>
     </div>
   )
@@ -129,7 +176,7 @@ const groupMissingKeysByLocale = (missingKeys: MissingKey[]) => {
   )
 }
 
-const groupMissingKeysByFileName = (missingKeys: MissingKey[]) => {
+const groupMissingKeysByFilePath = (missingKeys: MissingKey[]) => {
   return missingKeys.reduce(
     (acc: Record<string, MissingKey[]>, missingKey: MissingKey) => {
       const missingKeyFile = missingKey.file
@@ -146,25 +193,14 @@ const groupMissingKeysByFileName = (missingKeys: MissingKey[]) => {
 
 function SummaryOfMissingKeys() {
   const missingKeys = useAtomValue(missingKeysAtom)
-  const groupedMissingKeys = groupMissingKeysByLocale(missingKeys)
-  const [languageSelected, setLanguageSelected] = useState<string>(
-    Object.keys(groupedMissingKeys)[0] ?? DEFAULT_LOCALE,
-  )
-  const generateUniqueKey = (
-    file: string,
-    key: string,
-    locale: string | null,
-  ) => `${file}-${key}-${locale}`
+  const missingKeysGroupedByLocale = groupMissingKeysByLocale(missingKeys)
+  const [languageSelected, setLanguageSelected] = useAtom(localeAtom)
 
   const onlyDefaultLocale =
-    Object.keys(groupedMissingKeys).length === 1 &&
-    Object.keys(groupedMissingKeys)[0] === DEFAULT_LOCALE
+    Object.keys(missingKeysGroupedByLocale).length === 1 &&
+    Object.keys(missingKeysGroupedByLocale)[0] === DEFAULT_LOCALE
 
   const atLeastOneMissingKey = missingKeys.length > 0
-
-  const missingKeysGroupedByFileName = groupMissingKeysByFileName(
-    missingKeys.filter((mk) => mk.locale === languageSelected),
-  )
 
   const IS_DEFAULT_LOCALE = languageSelected === DEFAULT_LOCALE
 
@@ -186,11 +222,30 @@ function SummaryOfMissingKeys() {
           <div>
             <LocaleListPicker
               onChange={(l) => setLanguageSelected(l)}
-              locales={Object.keys(groupedMissingKeys)}
+              locales={Object.keys(missingKeysGroupedByLocale)}
             />
           </div>
         </div>
       )}
+      <MissingAndFilledKeysByLocale />
+    </div>
+  )
+}
+
+function MissingAndFilledKeysByLocale() {
+  const generateUniqueKey = (
+    file: string,
+    key: string,
+    locale: string | null,
+  ) => `${file}-${key}-${locale}`
+  const locale = useAtomValue(localeAtom)
+  const missingKeysByLocale = useAtomValue(missingKeysAtomByLocale)
+  const missingKeysGroupedByFileName = groupMissingKeysByFilePath(
+    missingKeysByLocale.filter((mk) => mk.locale === locale),
+  )
+
+  return (
+    <>
       {Object.keys(missingKeysGroupedByFileName).map((fileName) => (
         <div key={fileName} className="flex flex-col gap-4">
           <div className="text-md">{fileName}</div>
@@ -223,7 +278,7 @@ function SummaryOfMissingKeys() {
           </div>
         </div>
       ))}
-    </div>
+    </>
   )
 }
 

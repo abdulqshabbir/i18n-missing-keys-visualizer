@@ -3,17 +3,25 @@ import { useCallback } from "react"
 import { type FileWithPath, useDropzone } from "react-dropzone"
 import { isJsonString } from "../../utils"
 import { useAtom, useSetAtom } from "jotai"
-import { filePathToContentAtom, filesAtom, isDoneParsingAtom } from "@/atoms"
+import {
+  filePathToContentAtom,
+  filesAtom,
+  isDoneParsingAtom,
+  localeAtom,
+} from "@/atoms"
+import { DEFAULT_LOCALE, localeSet } from "@/utils/const"
 
 function DragAndDrop() {
   const [filesParsed, setFilesParsed] = useAtom(filesAtom)
-  const setFilePathToContent = useSetAtom(filePathToContentAtom)
   const [isDoneParsing, setIsDoneParsing] = useAtom(isDoneParsingAtom)
+  const setFilePathToContent = useSetAtom(filePathToContentAtom)
+  const setLocale = useSetAtom(localeAtom)
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       setIsDoneParsing(false)
       setFilesParsed(() => [])
       setFilePathToContent(() => ({}))
+      setLocale(() => DEFAULT_LOCALE)
       acceptedFiles.forEach((file: FileWithPath) => {
         const reader = new FileReader()
         reader.readAsText(file)
@@ -39,10 +47,17 @@ function DragAndDrop() {
 
           setFilesParsed((prev) => [...prev, file])
           setIsDoneParsing(true)
+
+          const subpaths = file.path?.split("/")
+          for (const spath of subpaths) {
+            if (localeSet.has(spath)) {
+              setLocale(() => spath)
+            }
+          }
         }
       })
     },
-    [setFilePathToContent, setFilesParsed, setIsDoneParsing],
+    [setFilePathToContent, setFilesParsed, setIsDoneParsing, setLocale],
   )
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
   return (

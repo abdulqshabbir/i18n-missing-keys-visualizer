@@ -46,7 +46,11 @@ function FilesParsedView() {
   return (
     <>
       {totalMissingKeys === 0 && (
-        <ReactConfetti width={width} height={height} data-testid="confetti" />
+        <ReactConfetti
+          width={width - 100}
+          height={height}
+          data-testid="confetti"
+        />
       )}
       <DocumentHead />
       <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-8 font-normal">

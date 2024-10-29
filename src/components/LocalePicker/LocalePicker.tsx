@@ -28,13 +28,17 @@ function LocaleListPicker({ locales, onChange }: LocaleListPickerProps) {
       onValueChange={(localeCode) => onChange(localeCode)}
       defaultValue={locales[0]}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px]" data-testid="locale-picker">
         <SelectValue placeholder="Default Language" />
       </SelectTrigger>
       <SelectContent>
         {localeOptions.map((locale) => {
           return (
-            <SelectItem value={locale.value} key={locale.value}>
+            <SelectItem
+              data-testid={`locale-${locale.value}`}
+              value={locale.value}
+              key={locale.value}
+            >
               {locale.label}
             </SelectItem>
           )

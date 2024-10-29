@@ -1,77 +1,63 @@
 import { Check, Drum, FolderUp } from "lucide-react"
 import { useCallback } from "react"
 import { type FileWithPath, useDropzone } from "react-dropzone"
-import { type DragAndDropProps } from "@/types"
+import { isJsonString } from "../../utils"
+import { useAtom, useSetAtom } from "jotai"
 import {
-  findNumberOfFilledOrMissingKeysRecurse,
-  findMissingKeysRecurse,
-  isJsonString,
-} from "../../utils"
-import { DEFAULT_CIPHERS } from "tls"
-import { DEFAULT_LOCALE } from "@/utils/const"
+  filePathToContentAtom,
+  filesAtom,
+  isDoneParsingAtom,
+  localeAtom,
+} from "@/atoms"
+import { DEFAULT_LOCALE, localeSet } from "@/utils/const"
 
-function DragAndDrop({
-  isDoneParsing,
-  setNumberOfMissingKeys,
-  setNumberOfFilledKeys,
-  setMissingKeys,
-  filesParsed,
-  setFilesParsed,
-  setIsDoneParsing,
-}: DragAndDropProps) {
+function DragAndDrop() {
+  const [filesParsed, setFilesParsed] = useAtom(filesAtom)
+  const [isDoneParsing, setIsDoneParsing] = useAtom(isDoneParsingAtom)
+  const setFilePathToContent = useSetAtom(filePathToContentAtom)
+  const setLocale = useSetAtom(localeAtom)
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      setNumberOfFilledKeys(0)
-      setNumberOfMissingKeys(0)
-      setMissingKeys([])
       setIsDoneParsing(false)
       setFilesParsed(() => [])
+      setFilePathToContent(() => ({}))
+      setLocale(() => DEFAULT_LOCALE)
       acceptedFiles.forEach((file: FileWithPath) => {
         const reader = new FileReader()
         reader.readAsText(file)
         reader.onloadend = () => {
           const jsonFile = reader.result
-          if (typeof jsonFile !== "string") {
-            return
-          }
 
           const translationFileAsObject =
+            typeof jsonFile === "string" &&
             isJsonString(jsonFile) &&
             (JSON.parse(jsonFile) as unknown as Record<string, unknown>)
 
-          if (!translationFileAsObject) return
-
-          const missingKeysWithLocale = findMissingKeysRecurse(
-            translationFileAsObject,
-            file.name,
-            file?.path,
+          if (
+            !translationFileAsObject ||
+            typeof translationFileAsObject !== "object" ||
+            !file.path
           )
+            return
 
-          const { filledKeys, missingKeys } =
-            findNumberOfFilledOrMissingKeysRecurse(translationFileAsObject)
+          setFilePathToContent((prev) => ({
+            ...prev,
+            [file.path!]: translationFileAsObject,
+          }))
 
-          setFilesParsed((prev) => [...prev, file.name])
-          setMissingKeys((prevMissingKeys) => [
-            ...prevMissingKeys,
-            ...missingKeysWithLocale.map((key) => ({
-              file: file.name,
-              missingKey: key.key,
-              locale: key.locale ?? DEFAULT_LOCALE,
-            })),
-          ])
-          setNumberOfFilledKeys((prev) => prev + filledKeys)
-          setNumberOfMissingKeys((prev) => prev + missingKeys)
+          setFilesParsed((prev) => [...prev, file])
           setIsDoneParsing(true)
+
+          const subpaths = file.path?.split("/")
+          for (const spath of subpaths) {
+            if (localeSet.has(spath)) {
+              setLocale(() => spath)
+            }
+          }
         }
       })
     },
-    [
-      setFilesParsed,
-      setIsDoneParsing,
-      setMissingKeys,
-      setNumberOfFilledKeys,
-      setNumberOfMissingKeys,
-    ],
+    [setFilePathToContent, setFilesParsed, setIsDoneParsing, setLocale],
   )
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
   return (

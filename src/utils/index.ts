@@ -1,6 +1,7 @@
-import { localeMap } from "@/utils/const"
+import { type MissingKey } from "@/types"
+import { DEFAULT_LOCALE, localeMap } from "@/utils/const"
 
-type MissingKeyWithLocale = {
+export type MissingKeyWithLocale = {
   locale: string | null
   key: string
 }
@@ -46,9 +47,10 @@ function findMissingKeysRecurse(
 }
 
 function findNumberOfFilledOrMissingKeysRecurse(
-  obj: Record<string, unknown>,
+  obj: Record<string, unknown> | undefined,
   count = { filledKeys: 0, missingKeys: 0 },
 ) {
+  if (!obj) return count
   const keys = Object.keys(obj)
   for (const key of keys) {
     // This is a leaf node
@@ -78,8 +80,24 @@ function isJsonString(str: string) {
   return true
 }
 
+const groupMissingKeysByLocale = (missingKeys: MissingKey[]) => {
+  return missingKeys.reduce(
+    (acc: Record<string, MissingKey[]>, missingKey: MissingKey) => {
+      const missingKeyLocale = missingKey.locale ?? DEFAULT_LOCALE
+      if (acc[missingKeyLocale]) {
+        acc[missingKeyLocale].push(missingKey)
+      } else {
+        acc[missingKeyLocale] = [missingKey]
+      }
+      return acc
+    },
+    {},
+  )
+}
+
 export {
   findMissingKeysRecurse,
   findNumberOfFilledOrMissingKeysRecurse,
   isJsonString,
+  groupMissingKeysByLocale,
 }

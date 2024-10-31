@@ -1,16 +1,16 @@
 import ReactConfetti from "react-confetti"
-import { DocumentHead } from "../../components/document-head/document-head"
-import { DragAndDrop } from "../../components/drag-and-drop/drag-and-drop"
-import { Footer } from "../../components/footer/footer"
-import { Header } from "../../components/header/header"
-import { HeroText } from "../../components/hero-text/hero-text"
+import { DocumentHead } from "@/components/document-head/document-head"
+import { DragAndDrop } from "@/components/drag-and-drop/drag-and-drop"
+import { Footer } from "@/components/footer/footer"
+import { Header } from "@/components/header/header"
+import { HeroText } from "@/components/hero-text/hero-text"
 import { useState } from "react"
 import { type MissingKey } from "@/types"
 import { Info, Check, X, Edit2, Download } from "lucide-react"
 import { useWindowSize } from "react-use"
-import { LocaleListPicker } from "../../components/locale-picker/locale-picker"
+import { LocaleListPicker } from "@/components/locale-picker/locale-picker"
 import { DEFAULT_LOCALE, localeCodeToLabelMap } from "@/utils/const"
-import { EditableJSONBuffer } from "../../components/json-editor/json-editor"
+import { EditableJSONBuffer } from "@/components/json-editor/json-editor"
 import { useAtom, useAtomValue } from "jotai"
 import {
   filesByLocaleAtom,
@@ -22,14 +22,14 @@ import {
   totalNumberOfMissingKeysForLocale,
 } from "@/atoms"
 import { type FileWithPath } from "react-dropzone"
-import { Button } from "../../components/ui/button"
+import { Button } from "@/components/ui/button"
 import { handleZipFileDownload } from "@/lib/file-saver"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../../components/ui/tooltip"
+} from "@/components/ui/tooltip"
 
 function FilesParsedView() {
   const { width, height } = useWindowSize(1000, 1000)

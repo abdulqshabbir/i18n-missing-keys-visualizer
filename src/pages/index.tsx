@@ -1,5 +1,5 @@
-import { FilesParsedView } from "../components/files-parsed-view/files-parsed-view"
-import { FilesNotParsedView } from "../components/files-not-parsed-view/files-not-parsed-view"
+import { FilesParsedView } from "@/components/files-parsed-view/files-parsed-view"
+import { FilesNotParsedView } from "@/components/files-not-parsed-view/files-not-parsed-view"
 import { useAtomValue } from "jotai"
 import { isDoneParsingAtom } from "@/atoms"
 

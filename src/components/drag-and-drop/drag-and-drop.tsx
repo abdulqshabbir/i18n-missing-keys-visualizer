@@ -16,6 +16,7 @@ function DragAndDrop() {
   const [isDoneParsing, setIsDoneParsing] = useAtom(isDoneParsingAtom)
   const setFilePathToContent = useSetAtom(filePathToContentAtom)
   const setLocale = useSetAtom(localeAtom)
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       setIsDoneParsing(false)
@@ -60,6 +61,7 @@ function DragAndDrop() {
     [setFilePathToContent, setFilesParsed, setIsDoneParsing, setLocale],
   )
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
+
   return (
     <div
       {...getRootProps()}
@@ -83,15 +85,28 @@ function DragAndDrop() {
           )}
         </>
       )}
-      <div className="flex items-center justify-center text-primary lg:w-2/3">
-        {isDoneParsing && (
-          <div className="flex flex-col items-center justify-center gap-4 text-sm text-gray-400">
-            <Check size={60} className="text-green-500" />
-            <p className="text-center">
-              {filesParsed.length} JSON Files accepted!
-            </p>
-          </div>
-        )}
+      <DragAndDropText
+        isDoneParsing={isDoneParsing}
+        filesParsed={filesParsed}
+      />
+    </div>
+  )
+}
+
+function DragAndDropText({
+  isDoneParsing,
+  filesParsed,
+}: {
+  isDoneParsing: boolean
+  filesParsed: File[]
+}) {
+  if (!isDoneParsing) return null
+
+  return (
+    <div className="flex items-center justify-center text-primary lg:w-2/3">
+      <div className="flex flex-col items-center justify-center gap-4 text-sm text-gray-400">
+        <Check size={60} className="text-green-500" />
+        <p className="text-center">{filesParsed.length} JSON Files accepted!</p>
       </div>
     </div>
   )

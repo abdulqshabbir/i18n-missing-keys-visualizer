@@ -1,9 +1,9 @@
 import { Check } from "lucide-react"
-import { DocumentHead } from "@/components/document-head/document-head"
-import { DragAndDrop } from "@/components/drag-and-drop/drag-and-drop"
-import { Footer } from "@/components/footer/footer"
-import { Header } from "@/components/header/header"
-import { HeroText } from "@/components/hero-text/hero-text"
+import { DocumentHead } from "../../components/document-head/document-head"
+import { DragAndDrop } from "../../components/drag-and-drop/drag-and-drop"
+import { Footer } from "../../components/footer/footer"
+import { Header } from "../../components/header/header"
+import { HeroText } from "../../components/hero-text/hero-text"
 
 function FilesNotParsedView() {
   return (

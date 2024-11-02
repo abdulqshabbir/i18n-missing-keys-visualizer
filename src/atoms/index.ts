@@ -1,7 +1,8 @@
 import { type FileWithPath } from "react-dropzone"
 import {
+  type AceEditorAnnotation,
+  findJsonFieldInfoRecurse,
   findMissingKeysRecurse,
-  findNumberOfFilledOrMissingKeysRecurse,
 } from "@/utils"
 import { DEFAULT_LOCALE, localeSet } from "@/utils/const"
 import { atom, createStore } from "jotai"
@@ -16,6 +17,12 @@ const isDoneParsingAtom = atom(false)
 const localeAtom = atom(DEFAULT_LOCALE)
 
 // derived atoms
+const resetFiles = () => {
+  store.set(filesAtom, [])
+  store.set(filePathToContentAtom, {})
+  store.set(isDoneParsingAtom, false)
+  store.set(localeAtom, DEFAULT_LOCALE)
+}
 const filesByLocaleAtom = atom((get) => {
   const files = get(filesAtom)
   const locale = get(localeAtom)
@@ -77,7 +84,7 @@ const numberOfMissingKeysAtom = atom((get) => {
   for (const path of paths) {
     const fileContents = filePathToContent[path] as Record<string, object>
     const { missingKeys: missing } =
-      findNumberOfFilledOrMissingKeysRecurse(fileContents)
+      findJsonFieldInfoRecurse(fileContents)
     missingKeys += missing
   }
   return missingKeys
@@ -89,7 +96,7 @@ const numberOfMissingKeysByFilePathAtom = atom((get) => {
   const result: Record<string, number> = {}
 
   for (const path of filePaths) {
-    const { missingKeys } = findNumberOfFilledOrMissingKeysRecurse(
+    const { missingKeys } = findJsonFieldInfoRecurse(
       filePathToContent[path] as Record<string, object>,
     )
     result[path] = missingKeys
@@ -103,7 +110,7 @@ const numberOfFilledKeysByFilePathAtom = atom((get) => {
   const result: Record<string, number> = {}
 
   for (const path of filePaths) {
-    const { filledKeys } = findNumberOfFilledOrMissingKeysRecurse(
+    const { filledKeys } = findJsonFieldInfoRecurse(
       filePathToContent[path] as Record<string, object>,
     )
     result[path] = filledKeys
@@ -158,6 +165,22 @@ const totalMissingKeys = atom((get) => {
   return missingKeys.length
 })
 
+const aceEditorMissingKeyAnnotationsByFilePathAtom = atom((get) => {
+  const result: Record<string, AceEditorAnnotation[]> = {}
+
+  const fileContentsByPath = get(filePathToContentAtom)
+  const paths = Object.keys(fileContentsByPath)
+
+  for (const path of paths) {
+    const content = fileContentsByPath[path]!
+    const { annotations } = findJsonFieldInfoRecurse(
+      content as Record<string, unknown>,
+    )
+    result[path] = annotations
+  }
+  return result
+})
+
 if (process.env.NODE_ENV !== "production") {
   filesAtom.debugLabel = "filesAtom"
   filePathToContentAtom.debugLabel = "filePathToContentAtom"
@@ -188,4 +211,6 @@ export {
   totalNumberOfFilledKeysForLocale,
   totalNumberOfMissingKeysForLocale,
   totalMissingKeys,
+  aceEditorMissingKeyAnnotationsByFilePathAtom,
+  resetFiles,
 }

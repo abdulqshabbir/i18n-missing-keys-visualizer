@@ -1,5 +1,5 @@
-import { filePathToContentAtom } from "@/atoms"
-import { useAtom } from "jotai"
+import { aceEditorMissingKeyAnnotationsByFilePathAtom, filePathToContentAtom } from "@/atoms"
+import { useAtom, useAtomValue } from "jotai"
 import { useState } from "react"
 import AceEditor from "react-ace"
 
@@ -25,6 +25,8 @@ function EditableJSONBuffer({
 
   const [jsonError, setJsonError] = useState<string | null>(null)
   const filename = selectedFilePath.split("/").pop() ?? selectedFilePath
+
+  const annotations = useAtomValue(aceEditorMissingKeyAnnotationsByFilePathAtom)
 
   const handleSave = async () => {
     let isError = null
@@ -83,7 +85,8 @@ function EditableJSONBuffer({
             }}
             tabSize={2}
             width="100%"
-            height="410px"
+            height="100%"
+            annotations={annotations[selectedFilePath]}
           />
         </div>
         <div className="flex justify-end gap-2 mt-4">

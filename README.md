@@ -17,10 +17,11 @@ or individual files and easily see if they are missing translations.
 
 ## 🚀 Features
 
-- 📁 Drag and drop individual JSON files to find missing keys
-- 🗄️ Drag and drop folders containing JSON files to find missing keys
+- 📁 Drag and drop individual i18n JSON files or folders
 - ✔️  Locate missing keys for flat or deeply nested JSON objects
 - 🍱 Group missing keys by their 18n language code
+- ✎ Edit your JSON files
+- ⬇️ Download your edited JSON files as a zip
 
 ## 🛠️ Main Technologies
 

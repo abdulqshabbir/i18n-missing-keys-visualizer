@@ -46,23 +46,50 @@ function findMissingKeysRecurse(
   return missingKeys
 }
 
-function findNumberOfFilledOrMissingKeysRecurse(
+export type AceEditorAnnotation = {
+  row: number
+  column: number
+  type: "error" | "info"
+  text: string
+}
+
+type RecurseInfo = {
+  filledKeys: number
+  missingKeys: number
+  currentLine: number
+  annotations: Array<AceEditorAnnotation>
+}
+
+function findJsonFieldInfoRecurse(
   obj: Record<string, unknown> | undefined,
-  count = { filledKeys: 0, missingKeys: 0 },
+  count: RecurseInfo = {
+    filledKeys: 0,
+    missingKeys: 0,
+    currentLine: -1,
+    annotations: [],
+  },
 ) {
   if (!obj) return count
   const keys = Object.keys(obj)
   for (const key of keys) {
     // This is a leaf node
+    count.currentLine++
     if (typeof obj[key] === "string") {
       if (obj[key] !== "") {
         count.filledKeys = count.filledKeys + 1
       } else {
         count.missingKeys = count.missingKeys + 1
+        count.annotations.push({
+          row: count.currentLine,
+          column: 0,
+          type: "error",
+          text: `Missing value for ${key}`,
+        })
       }
     } else {
+      count.currentLine++
       // This is a nested object
-      findNumberOfFilledOrMissingKeysRecurse(
+      findJsonFieldInfoRecurse(
         obj[key] as Record<string, unknown>,
         count,
       )
@@ -97,7 +124,7 @@ const groupMissingKeysByLocale = (missingKeys: MissingKey[]) => {
 
 export {
   findMissingKeysRecurse,
-  findNumberOfFilledOrMissingKeysRecurse,
+  findJsonFieldInfoRecurse,
   isJsonString,
   groupMissingKeysByLocale,
 }

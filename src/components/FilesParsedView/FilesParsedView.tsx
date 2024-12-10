@@ -13,6 +13,7 @@ import { DEFAULT_LOCALE, localeCodeToLabelMap } from "@/utils/const"
 import { EditableJSONBuffer } from "@/components/JSONEditor/JSONEditor"
 import { useAtom, useAtomValue } from "jotai"
 import {
+  type CustomFile,
   filesByLocaleAtom,
   localeAtom,
   missingKeysAtom,
@@ -104,31 +105,33 @@ function SummaryOfFiles() {
   return (
     <>
       <div className="flex flex-wrap gap-4">
-        {filesParsed.map((file: FileWithPath, idx) => (
-          <div
-            className="rounded-sm bg-gray-100 px-2 py-1 text-sm text-primary flex items-center gap-2"
-            key={`file-${idx}`}
-          >
-            {file.name}
-            {file.path !== undefined &&
-            numberOfMissingKeysByFilePath[file.path]! > 0 ? (
-              <X className="text-red-500" />
-            ) : (
-              <Check className="text-green-500" />
-            )}
-            <button
-              onClick={() => {
-                if (!file.path) return
-                setSelectedFilePath(file.path)
-                setEditingFile(true)
-              }}
-              className="text-blue-500 hover:text-blue-700 hover:bg-gray-200 p-1 rounded-sm"
-              data-testid={`edit-file-${file.name}`}
+        {filesParsed.map((file: CustomFile, idx) => {
+          return (
+            <div
+              className="rounded-sm bg-gray-100 px-2 py-1 text-sm text-primary flex items-center gap-2"
+              key={`file-${idx}`}
             >
-              <Edit2 size={16} />
-            </button>
-          </div>
-        ))}
+              {file.name}
+              {file.path !== undefined &&
+                numberOfMissingKeysByFilePath[file.path]! > 0 ? (
+                <X className="text-red-500" />
+              ) : (
+                <Check className="text-green-500" />
+              )}
+              <button
+                onClick={() => {
+                  if (!file.path) return
+                  setSelectedFilePath(file.path)
+                  setEditingFile(true)
+                }}
+                className="text-blue-500 hover:text-blue-700 hover:bg-gray-200 p-1 rounded-sm"
+                data-testid={`edit-file-${file.name}`}
+              >
+                <Edit2 size={16} />
+              </button>
+            </div>
+          )
+        })}
       </div>
       {editingFile && selectedFilePath && (
         <EditableJSONBuffer

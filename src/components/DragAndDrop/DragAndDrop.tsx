@@ -45,7 +45,7 @@ function DragAndDrop() {
             [file.path!]: translationFileAsObject,
           }))
 
-          setFilesParsed((prev) => [...prev, file])
+          setFilesParsed((prev) => [...prev, { name: file.name, path: file.path }])
           setIsDoneParsing(true)
 
           const subpaths = file.path?.split("/")

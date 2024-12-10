@@ -1,4 +1,3 @@
-import { type FileWithPath } from "react-dropzone"
 import {
   type AceEditorAnnotation,
   findJsonFieldInfoRecurse,
@@ -7,14 +6,19 @@ import {
 import { DEFAULT_LOCALE, localeSet } from "@/utils/const"
 import { atom, createStore } from "jotai"
 import { type MissingKey } from "@/types"
+import { atomWithStorage } from "jotai/utils"
 
 const store = createStore()
 
 // primitive atoms
-const filesAtom = atom<FileWithPath[]>([])
-const filePathToContentAtom = atom<Record<string, object>>({})
-const isDoneParsingAtom = atom(false)
-const localeAtom = atom(DEFAULT_LOCALE)
+export type CustomFile = {
+  name: string
+  path?: string
+}
+const filesAtom = atomWithStorage<CustomFile[]>("files", [])
+const filePathToContentAtom = atomWithStorage<Record<string, object>>("file_path_to_content", {})
+const isDoneParsingAtom = atomWithStorage("is_done_parsing", false)
+const localeAtom = atomWithStorage("locale", DEFAULT_LOCALE)
 
 // derived atoms
 const resetFiles = () => {
@@ -26,7 +30,7 @@ const resetFiles = () => {
 const filesByLocaleAtom = atom((get) => {
   const files = get(filesAtom)
   const locale = get(localeAtom)
-  const result: FileWithPath[] = []
+  const result: CustomFile[] = []
   for (const file of files) {
     const path = file.path
     let fileLocale = DEFAULT_LOCALE
